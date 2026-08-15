@@ -26,7 +26,7 @@
             <th style="color:#111;border:none;">Item</th>
             <th style="color:#111;border:none;">Total Harga</th>
             <th style="color:#111;border:none;">Status</th>
-            <th style="color:#111;border:none;">Edit</th>
+            <th style="color:#111;border:none;">Struk</th>
           </tr>
         </thead>
         <tbody>
@@ -50,7 +50,7 @@
               @endif
             </td>
             <td>
-              <a href="{{ route('kasir.struk',$t->id) }}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-2"><i class="bi bi-receipt"></i></a>
+              <a href="{{ route('kasir.struk',$t->id) }}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-2" title = "struk"><i class="bi bi-receipt"></i></a>
             </td>
           </tr>
           @empty

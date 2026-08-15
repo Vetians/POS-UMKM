@@ -16,6 +16,7 @@
 .del-fab:hover{background:#dc2626;}
 </style>
 @endpush
+
 @section('content')
 <div class="d-flex align-items-center justify-content-between mb-3">
   <div class="d-flex align-items-center gap-2">
@@ -30,6 +31,12 @@
     </div>
     <button class="btn btn-orange btn-sm rounded-circle" onclick="bukaModalTambah()"><i class="bi bi-plus-lg"></i></button>
   </div>
+</div>
+
+{{-- NOTIFIKASI TOAST MELAYANG DENGAN ANIMASI FADE & SLIDE (Sinkron dengan Kategori) --}}
+<div id="toastSukses" class="position-fixed start-50 translate-middle-x p-3 bg-dark text-white rounded-3 shadow border border-secondary" 
+     style="z-index: 9999; top: -50px; opacity: 0; min-width: 250px; text-align: center; font-weight: 600; font-size: 0.9rem; transition: all 0.3s ease-in-out;">
+  <span class="text-success me-2">✅</span> <span id="toastTeks">Produk berhasil disimpan!</span>
 </div>
 
 <div class="row g-3" id="gridProduk">
@@ -48,7 +55,8 @@
       </div>
       <div class="fab-group">
         <button class="del-fab" onclick="hapusProduk({{ $p->id }}, '{{ addslashes($p->nama) }}', this)"><i class="bi bi-trash"></i></button>
-        <button class="edit-fab" onclick='editProduk({{ json_encode($p) }})'><i class="bi bi-pencil"></i></button>
+        {{-- PERBAIKAN 1: Menambahkan 'this' pada parameter click editProduk --}}
+        <button class="edit-fab" onclick='editProduk({{ json_encode($p) }}, this)'><i class="bi bi-pencil"></i></button>
       </div>
     </div>
   </div>
@@ -57,7 +65,7 @@
   @endforelse
 </div>
 
-{{-- Modal Tambah Produk --}}
+{{-- Modal Tambah/Edit Produk --}}
 <div class="modal fade" id="modalProduk" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -94,18 +102,6 @@
   </div>
 </div>
 
-{{-- Modal Sukses --}}
-<div class="modal fade" id="modalSukses" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-  <div class="modal-dialog modal-dialog-centered modal-sm">
-    <div class="modal-content border-0 shadow" style="border-radius:16px;">
-      <div class="modal-body text-center py-4 px-3">
-        <div style="font-size:3rem;margin-bottom:.5rem;">✅</div>
-        <h6 class="fw-bold mb-1" id="suksesTeks">Produk berhasil disimpan!</h6>
-        <p class="text-muted small mb-0">Data telah diperbarui.</p>
-      </div>
-    </div>
-  </div>
-</div>
 {{-- Modal Konfirmasi Hapus --}}
 <div class="modal fade" id="modalHapus" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-dialog-centered modal-sm">
@@ -123,9 +119,11 @@
   </div>
 </div>
 @endsection
+
 @push('scripts')
 <script>
 let actionUrl = '';
+let _hapusId = null, _hapusBtn = null; // Variabel penampung elemen global
 
 function bukaModalTambah() {
   actionUrl = '{{ route("produk.store", $kategori) }}';
@@ -141,20 +139,39 @@ function bukaModalTambah() {
   new bootstrap.Modal(document.getElementById('modalProduk')).show();
 }
 
-function editProduk(p) {
-  actionUrl = `/data-produk/item/${p.id}`;
+function editProduk(p, btn) {
+  _hapusBtn = btn; 
+  
+  // Ambil elemen kartu produk tempat tombol ini berada
+  const productCard = btn.closest('.produk-card');
+  
+  // SCAN DATA TERBARU LANGSUNG DARI LAYAR (DOM)
+  const namaTerbaru = productCard.querySelector('.produk-nama').textContent.trim();
+  
+  // Cari input harga awal dan jual dari string teks, bersihkan karakter "Rp", titik, dan koma
+  const prices = productCard.querySelectorAll('.produk-price');
+  
+  // Trik regex untuk mengambil angka saja dari teks "Harga Jual: Rp 15.000,-"
+  const hargaJualTerbaru = prices[0].textContent.replace(/[^0-9]/g, '');
+  const hargaAwalTerbaru = prices[1].textContent.replace(/[^0-9]/g, '');
+
+  actionUrl = `/data-produk/item/${p.id}`; 
   document.getElementById('modalProdukTitle').textContent = 'Edit Produk';
   document.getElementById('produkMethod').value = 'PUT';
-  document.getElementById('fKode').value  = p.kode;
-  document.getElementById('fNama').value  = p.nama;
+  
+  // Masukkan data terbaru hasil scan ke dalam Form Modal
+  document.getElementById('fKode').value  = p.kode; // Kode unik umumnya tetap
+  document.getElementById('fNama').value  = namaTerbaru; // <--- Menggunakan nama terbaru di layar
   document.getElementById('fMerk').value  = p.merk || '';
-  document.getElementById('fModal').value = p.harga_awal;
-  document.getElementById('fHarga').value = p.harga_jual;
+  document.getElementById('fModal').value = hargaAwalTerbaru; // <--- Menggunakan modal terbaru
+  document.getElementById('fHarga').value = hargaJualTerbaru; // <--- Menggunakan harga jual terbaru
   document.getElementById('fDesk').value  = p.deskripsi || '';
   document.getElementById('fFoto').value  = '';
+  
   new bootstrap.Modal(document.getElementById('modalProduk')).show();
 }
 
+// Handler Submit Form Tambah & Edit Produk via AJAX Fetch
 document.getElementById('formProduk').addEventListener('submit', async function(e) {
   e.preventDefault();
   const btn = document.getElementById('btnSimpan');
@@ -162,41 +179,109 @@ document.getElementById('formProduk').addEventListener('submit', async function(
   btn.textContent = 'Menyimpan...';
 
   const formData = new FormData(this);
+  const methodValue = document.getElementById('produkMethod').value;
+  formData.set('_method', methodValue); 
 
   try {
     const res = await fetch(actionUrl, {
-      method: 'POST',
-      headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+      method: 'POST', 
+      headers: { 
+        'X-CSRF-TOKEN': '{{ csrf_token() }}', 
+        'Accept': 'application/json' 
+      },
       body: formData
     });
+    
     const json = await res.json();
 
-    if (json.success) {
-      // Tutup modal form
-      bootstrap.Modal.getInstance(document.getElementById('modalProduk')).hide();
+    if (res.ok && json.success) {
+      const myModalEl = document.getElementById('modalProduk');
+      const modalInstance = bootstrap.Modal.getInstance(myModalEl);
+      if (modalInstance) {
+        modalInstance.hide();
+      }
 
-      // Tampilkan modal sukses
-      const isEdit = document.getElementById('produkMethod').value === 'PUT';
-      document.getElementById('suksesTeks').textContent = isEdit
-        ? 'Produk berhasil diperbarui!'
-        : 'Produk berhasil ditambahkan!';
-      const modalSukses = new bootstrap.Modal(document.getElementById('modalSukses'));
-      modalSukses.show();
+      document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
 
-      // Reload halaman setelah 1.5 detik
-      setTimeout(() => { window.location.reload(); }, 1500);
+      const isEdit = methodValue === 'PUT';
+      const toast = document.getElementById('toastSukses');
+
+      if (isEdit) {
+        // Skenario A: JIKA EDIT (Live Update DOM Kartu secara real-time)
+        if (_hapusBtn) {
+          const productCard = _hapusBtn.closest('.produk-card');
+          productCard.querySelector('.produk-nama').textContent = formData.get('nama');
+          
+          const prices = productCard.querySelectorAll('.produk-price');
+          const hargaJualFormated = parseFloat(formData.get('harga_jual')).toLocaleString('id-ID');
+          const hargaAwalFormated = parseFloat(formData.get('harga_awal')).toLocaleString('id-ID');
+          
+          prices[0].innerHTML = `Harga Jual:<br><strong>Rp ${hargaJualFormated},-</strong>`;
+          prices[1].innerHTML = `Modal Awal:<br>Rp ${hargaAwalFormated},-`;
+
+          // Handle live update preview foto
+          const fileInput = document.getElementById('fFoto');
+          if (fileInput.files && fileInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const imgEl = productCard.querySelector('.produk-img');
+              if (imgEl) {
+                imgEl.src = e.target.result;
+              } else {
+                const phEl = productCard.querySelector('.produk-img-ph');
+                if (phEl) {
+                  const newImg = document.createElement('img');
+                  newImg.src = e.target.result;
+                  newImg.className = 'produk-img';
+                  newImg.alt = formData.get('nama');
+                  phEl.replaceWith(newImg);
+                }
+              }
+            }
+            reader.readAsDataURL(fileInput.files[0]);
+          }
+        }
+
+        document.getElementById('toastTeks').textContent = 'Produk diperbarui!';
+        toast.style.top = '1rem';
+        toast.style.opacity = '1';
+
+        setTimeout(() => { 
+          toast.style.opacity = '0';
+          toast.style.top = '-50px';
+        }, 800);
+
+      } else {
+        // Skenario B: JIKA TAMBAH BARU
+        document.getElementById('toastTeks').textContent = 'Produk berhasil ditambahkan!';
+        toast.style.top = '1rem';
+        toast.style.opacity = '1';
+
+        setTimeout(() => { 
+          window.location.reload();
+        }, 600);
+      }
+
     } else {
-      alert('Gagal menyimpan produk. Coba lagi.');
+      if (json.errors) {
+        let errMessage = '';
+        Object.values(json.errors).forEach(err => { errMessage += `- ${err[0]}\n`; });
+        alert('Gagal menyimpan produk:\n' + errMessage);
+      } else {
+        alert(json.message || 'Gagal menyimpan produk. Coba lagi.');
+      }
     }
   } catch (err) {
-    alert('Terjadi kesalahan. Coba lagi.');
+    alert('Terjadi kesalahan koneksi sistem.');
     console.error(err);
-  } finally {
+  } finally { // <-- PERBAIKAN 3: Memastikan sintaks JavaScript tertulis 'finally'
     btn.disabled = false;
     btn.textContent = 'Simpan';
   }
 });
-let _hapusId = null, _hapusBtn = null;
 
 function hapusProduk(id, nama, btn) {
   _hapusId  = id;
@@ -216,6 +301,7 @@ document.getElementById('btnKonfirmasiHapus').addEventListener('click', async fu
     const json = await res.json();
     if (json.success) {
       _hapusBtn.closest('[class*="col-"]').remove();
+      document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
     } else {
       alert('Gagal menghapus produk.');
     }

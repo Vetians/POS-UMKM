@@ -31,13 +31,30 @@
       <div class="card-body">
         <div class="row g-4">
           <div class="col-md-4 text-center">
+            @php
+              $user = auth()->user();
+              $avatarName = 'User';
+              $avatarBg = 'f97316'; // Orange khas tema toko untuk semua
+              if ($user->role === 'admin') {
+                  $avatarName = 'AD';
+              } else {
+                  $lowerName = strtolower($user->name);
+                  if (str_contains($lowerName, '1') || str_contains($lowerName, 'k1')) {
+                      $avatarName = 'K1';
+                  } elseif (str_contains($lowerName, '2') || str_contains($lowerName, 'k2')) {
+                      $avatarName = 'K2';
+                  } elseif (str_contains($lowerName, '3') || str_contains($lowerName, 'k3')) {
+                      $avatarName = 'K3';
+                  } else {
+                      $avatarName = $user->name;
+                  }
+              }
+              $avatarUrl = "https://ui-avatars.com/api/?name=" . urlencode($avatarName) . "&background=" . $avatarBg . "&color=fff&size=120&bold=true";
+            @endphp
             <div class="position-relative d-inline-block mb-3">
               <img id="previewFoto"
-                src="{{ $user->foto ? asset('uploads/user/'.$user->foto) : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=f97316&color=fff&size=120' }}"
+                src="{{ $avatarUrl }}"
                 style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid #f97316;">
-              <label for="inputFoto" style="position:absolute;bottom:0;right:0;width:28px;height:28px;background:#1a2fa0;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:.8rem;">
-                <i class="bi bi-camera"></i>
-              </label>
             </div>
             <div class="fw-bold">{{ $user->name }}</div>
             <div class="text-muted small">{{ ucfirst($user->role) }}</div>
@@ -51,7 +68,6 @@
             <p class="text-muted small mb-3">Perbarui data profil akun Anda</p>
             <form action="{{ route('settings.profile') }}" method="POST" enctype="multipart/form-data">
               @csrf
-              <input type="file" id="inputFoto" name="foto" class="d-none" accept="image/*" onchange="previewImg(this)">
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label small">Nama Lengkap</label>
@@ -116,6 +132,10 @@
             </div>
           </div>
           <div class="mb-3">
+            <label class="form-label small fw-semibold">Nomor Rekening Bank <span class="text-muted fw-normal">(untuk pembayaran Transfer Bank di kasir)</span></label>
+            <input type="text" name="nomor_rekening" class="form-control" value="{{ $toko->nomor_rekening }}" placeholder="Contoh: BCA 12345678 a/n Toko Madura">
+          </div>
+          <!-- <div class="mb-3">
             <label class="form-label small fw-semibold">Logo toko</label>
             <div class="d-flex align-items-center gap-3">
               <div class="position-relative">
@@ -132,6 +152,27 @@
                 <span class="small">PNG, JPG, WEBP (max 2MB)</span>
               </label>
               <input type="file" id="inputLogo" name="logo" class="d-none" accept="image/*" onchange="previewLogoImg(this)">
+            </div>
+          </div> -->
+          <div class="mb-4">
+            <label class="form-label small fw-semibold">Gambar QR QRIS <span class="text-muted fw-normal">(untuk pembayaran QRIS di kasir)</span></label>
+            <div class="d-flex align-items-center gap-3">
+              <div class="position-relative">
+                @if($toko->qris_image)
+                  <img id="previewQris" src="{{ asset('uploads/toko/'.$toko->qris_image) }}"
+                    style="width:80px;height:80px;object-fit:contain;border:2px solid #e5e7eb;border-radius:8px;background:#f9fafb;">
+                @else
+                  <div id="previewQris" style="width:80px;height:80px;border:2px dashed #d1d5db;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:1.5rem;">
+                    <i class="bi bi-qr-code"></i>
+                  </div>
+                @endif
+              </div>
+              <label for="inputQris" class="border border-2 border-dashed rounded-3 p-3 text-center flex-fill" style="cursor:pointer;color:#6b7280;">
+                <i class="bi bi-qr-code-scan fs-4 d-block text-primary mb-1"></i>
+                <span class="fw-semibold text-primary small">Upload Gambar QR QRIS</span><br>
+                <span class="small">PNG, JPG (max 2MB) — Simpan gambar QR dari aplikasi e-wallet kamu</span>
+              </label>
+              <input type="file" id="inputQris" name="qris_image" class="d-none" accept="image/*" onchange="previewQrisImg(this)">
             </div>
           </div>
           <div class="mb-4">
@@ -161,6 +202,20 @@ function previewLogoImg(input) {
   if (input.files && input.files[0]) {
     const reader = new FileReader();
     reader.onload = e => document.getElementById('previewLogo').src = e.target.result;
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+function previewQrisImg(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const el = document.getElementById('previewQris');
+      if (el.tagName === 'IMG') {
+        el.src = e.target.result;
+      } else {
+        el.outerHTML = `<img id="previewQris" src="${e.target.result}" style="width:80px;height:80px;object-fit:contain;border:2px solid #e5e7eb;border-radius:8px;background:#f9fafb;">`;
+      }
+    };
     reader.readAsDataURL(input.files[0]);
   }
 }

@@ -5,11 +5,11 @@
 <title>Login - Madura's Store</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
 <style>
-body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:'Segoe UI',sans-serif;background:url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1200&q=80') center/cover no-repeat;position:relative;}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:'Segoe UI',sans-serif;background:url('{{ asset('img/login/background.png') }}') center/cover no-repeat;position:relative;}
 body::before{content:'';position:absolute;inset:0;background:rgba(10,20,80,.45);}
-.login-box{position:relative;background:#fff;border-radius:16px;padding:2.5rem;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.4);}
-.login-header{background:#1a2fa0;text-align:center;padding:1rem;border-radius:10px;margin-bottom:1.5rem;}
-.login-header h2{color:#fff;font-weight:700;font-size:1.5rem;margin:0;letter-spacing:2px;}
+.login-box{position:relative;background:#fff;border-radius:18px;padding:3rem 3.5rem;width:100%;max-width:520px;box-shadow:0 20px 60px rgba(0,0,0,.4);}
+.login-header{background:#1a2fa0;text-align:center;padding:1.2rem 1rem;border-radius:10px;margin-bottom:2rem;}
+.login-header h2{color:#fff;font-weight:700;font-size:1.75rem;margin:0;letter-spacing:2px;}
 .form-label{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#374151;}
 .form-control{border-radius:8px;background:#fdba74;border:none;color:#1f2937;font-weight:500;padding:.65rem 1rem;}
 .form-control::placeholder{color:rgba(31,41,55,.6);}

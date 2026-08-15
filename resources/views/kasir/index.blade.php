@@ -39,11 +39,35 @@
 /* Metode Modal */
 .metode-section{background:#374151;color:#fff;border-radius:8px;padding:.5rem 1rem;margin-bottom:.75rem;font-size:.8rem;font-weight:600;}
 .metode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.75rem;}
-.metode-btn{border:1.5px solid #e5e7eb;border-radius:8px;padding:.4rem;text-align:center;cursor:pointer;background:#fff;font-size:.8rem;transition:all .15s;}
-.metode-btn:hover,.metode-btn.selected{border-color:#1a2fa0;background:#eff6ff;}
-.metode-btn img,.metode-btn span{display:block;}
+.metode-btn{border:1.5px solid #e5e7eb;border-radius:8px;padding:.5rem .4rem;display:flex;align-items:center;justify-content:center;min-height:48px;cursor:pointer;background:#fff;font-size:.8rem;transition:all .15s;box-sizing:border-box;}
+.metode-btn:hover,.metode-btn.selected{border-color:#1a2fa0;background:#eff6ff;box-shadow:0 2px 6px rgba(26,47,160,.08);}
+.metode-btn img{height:22px;width:auto;max-width:100%;object-fit:contain;display:block;}
+.metode-btn span{display:block;}
 .metode-tunai{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
-.metode-tunai .metode-btn{display:flex;align-items:center;justify-content:center;gap:.4rem;padding:.6rem;}
+.metode-tunai .metode-btn{display:flex;align-items:center;justify-content:center;gap:.4rem;padding:.6rem;font-weight:600;color:#374151;}
+
+/* ── Kalkulator Cash ── */
+.kalk-total-box{background:linear-gradient(135deg,#1a2fa0,#2563eb);color:#fff;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;text-align:center;}
+.kalk-total-box .kalk-label{font-size:.7rem;font-weight:700;letter-spacing:1px;opacity:.8;margin-bottom:.2rem;}
+.kalk-total-box .kalk-amount{font-size:1.6rem;font-weight:800;}
+.kalk-input-box{background:#f8fafc;border:2px solid #e2e8f0;border-radius:10px;padding:.75rem 1rem;margin-bottom:.75rem;cursor:text;}
+.kalk-input-box .kalk-input-label{font-size:.7rem;font-weight:700;color:#6b7280;letter-spacing:.5px;margin-bottom:.3rem;}
+.kalk-input-box .kalk-input-val{font-size:1.4rem;font-weight:700;color:#111827;min-height:2rem;word-break:break-all;}
+.kalk-kembalian-box{border-radius:10px;padding:.75rem 1rem;margin-bottom:.75rem;text-align:center;transition:all .2s;}
+.kalk-kembalian-box.positif{background:#d1fae5;border:2px solid #6ee7b7;}
+.kalk-kembalian-box.negatif{background:#fee2e2;border:2px solid #fca5a5;}
+.kalk-kembalian-box.netral{background:#f1f5f9;border:2px solid #e2e8f0;}
+.kalk-kembalian-box .kalk-kem-label{font-size:.7rem;font-weight:700;letter-spacing:.5px;margin-bottom:.2rem;}
+.kalk-kembalian-box.positif .kalk-kem-label{color:#065f46;}
+.kalk-kembalian-box.negatif .kalk-kem-label{color:#991b1b;}
+.kalk-kembalian-box.netral .kalk-kem-label{color:#64748b;}
+.kalk-kembalian-box .kalk-kem-val{font-size:1.3rem;font-weight:800;}
+.kalk-kembalian-box.positif .kalk-kem-val{color:#059669;}
+.kalk-kembalian-box.negatif .kalk-kem-val{color:#dc2626;}
+.kalk-kembalian-box.netral .kalk-kem-val{color:#64748b;}
+.quick-fill{display:grid;grid-template-columns:repeat(3,1fr);gap:.35rem;margin-bottom:.75rem;}
+.quick-btn{border:1px solid #e2e8f0;border-radius:6px;padding:.35rem .3rem;font-size:.72rem;font-weight:600;background:#fff;cursor:pointer;color:#374151;text-align:center;transition:all .1s;user-select:none;}
+.quick-btn:hover{background:#1a2fa0;color:#fff;border-color:#1a2fa0;}
 </style>
 @endpush
 @section('content')
@@ -124,13 +148,14 @@
         </div>
 
         <div class="metode-section">Pembayaran Non-Tunai</div>
-        <div class="metode-grid">
-          <div class="metode-btn" onclick="pilihMetode('gopay',this)"><span style="color:#00ae11;font-weight:800;font-size:.9rem;">gopay</span></div>
-          <div class="metode-btn" onclick="pilihMetode('dana',this)"><span style="color:#118eea;font-weight:800;font-size:.9rem;">DANA</span></div>
-          <div class="metode-btn" onclick="pilihMetode('qris',this)"><span style="color:#e53e3e;font-weight:800;font-size:.9rem;">QRIS</span></div>
-          <div class="metode-btn" onclick="pilihMetode('bca',this)"><span style="color:#004f97;font-weight:800;font-size:.9rem;">BCA</span></div>
-          <div class="metode-btn" onclick="pilihMetode('seabank',this)"><span style="color:#005fab;font-weight:800;font-size:.9rem;">SeaBank</span></div>
-          <div class="metode-btn" onclick="pilihMetode('mandiri',this)"><span style="color:#003d7a;font-weight:800;font-size:.9rem;">mandiri</span></div>
+        <div class="metode-tunai mb-3">
+          <div class="metode-btn" onclick="pilihMetode('qris',this)">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo_QRIS.svg" alt="QRIS" style="height:20px;">
+          </div>
+          <div class="metode-btn" onclick="pilihMetode('transfer',this)">
+            <i class="bi bi-bank me-2 text-primary fs-6"></i>
+            <span class="fw-bold" style="color:#374151;font-size:0.8rem;">TRANSFER</span>
+          </div>
         </div>
 
         <div class="metode-section">Pembayaran Tunai</div>
@@ -145,6 +170,112 @@
       <div class="modal-footer border-0 pt-0">
         <button class="btn btn-danger flex-fill" data-bs-dismiss="modal">BATALKAN</button>
         <button class="btn btn-secondary flex-fill" id="btnBayarFinal" onclick="prosesBayar()">BAYAR</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{-- Modal QRIS --}}
+<div class="modal fade" id="modalQris" tabindex="-1" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content border-0 shadow" style="border-radius:16px;">
+      <div class="modal-body text-center py-4 px-3">
+        <div class="fw-bold mb-1" style="font-size:.85rem;color:#6b7280;">SCAN QRIS UNTUK MEMBAYAR</div>
+        <div class="fw-bold fs-5 mb-3" id="qrisNominal" style="color:#1a2fa0;"></div>
+        @if($toko?->qris_image)
+          <img src="{{ asset('uploads/toko/'.$toko->qris_image) }}" alt="QRIS" style="width:200px;height:200px;object-fit:contain;border:2px solid #e5e7eb;border-radius:8px;margin-bottom:1rem;">
+        @else
+          <div style="width:200px;height:200px;border:2px dashed #d1d5db;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:3rem;margin:0 auto 1rem;">
+            <i class="bi bi-qr-code"></i>
+          </div>
+          <p class="text-muted small">QR belum diupload. Upload di <a href="{{ route('settings.index') }}?tab=business">Settings</a></p>
+        @endif
+        <p class="text-muted small mb-3">Tunjukkan QR ini ke pembeli, pastikan pembayaran masuk sebelum konfirmasi.</p>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-secondary flex-fill" onclick="tutupQris()">Batal</button>
+          <button class="btn btn-success flex-fill fw-bold" onclick="konfirmasiQris()"><i class="bi bi-check-circle me-1"></i>Konfirmasi Bayar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{-- Modal Transfer Bank --}}
+<div class="modal fade" id="modalTransfer" tabindex="-1" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content border-0 shadow" style="border-radius:16px;">
+      <div class="modal-body text-center py-4 px-3">
+        <div class="fw-bold mb-1" style="font-size:.85rem;color:#6b7280;">TRANSFER BANK</div>
+        <div class="fw-bold fs-5 mb-3" id="transferNominal" style="color:#1a2fa0;"></div>
+        
+        <div class="bg-light p-3 rounded mb-3 border text-center">
+          <div class="text-muted small mb-1 fw-semibold">NOMOR REKENING TUJUAN</div>
+          @if($toko?->nomor_rekening)
+            <div class="fw-bold fs-6 text-dark" id="rekDisplay">{{ $toko->nomor_rekening }}</div>
+            <button class="btn btn-sm btn-outline-primary mt-2 py-1 px-3 rounded-pill" onclick="copyRekening()" style="font-size:0.75rem;">
+              <i class="bi bi-copy me-1"></i>Salin Rekening
+            </button>
+          @else
+            <div class="text-danger small fw-semibold">Belum diatur. Atur di <a href="{{ route('settings.index') }}?tab=business">Settings</a></div>
+          @endif
+        </div>
+        
+        <p class="text-muted small mb-3">Tunjukkan nomor rekening ini ke pembeli, pastikan transfer masuk sebelum konfirmasi.</p>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-secondary flex-fill" onclick="tutupTransfer()">Batal</button>
+          <button class="btn btn-success flex-fill fw-bold" onclick="konfirmasiTransfer()"><i class="bi bi-check-circle me-1"></i>Konfirmasi Bayar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{-- Modal Kalkulator Cash --}}
+<div class="modal fade" id="modalKalkCash" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content border-0 shadow-lg" style="border-radius:16px;overflow:hidden;">
+      <div class="modal-body p-3">
+
+        {{-- Jumlah harus dibayar --}}
+        <div class="kalk-total-box">
+          <div class="kalk-label">💵 TOTAL HARUS DIBAYAR</div>
+          <div class="kalk-amount" id="kalkTotalText">Rp 0</div>
+        </div>
+
+        {{-- Quick-fill pecahan uang --}}
+        <div style="font-size:.7rem;font-weight:700;color:#6b7280;letter-spacing:.5px;margin-bottom:.4rem;">UANG DITERIMA CEPAT</div>
+        <div class="quick-fill" id="kalkQuickFill">
+          {{-- diisi oleh JS --}}
+        </div>
+
+        {{-- Input uang diterima (keyboard) --}}
+        <div class="mb-3">
+          <div style="font-size:.7rem;font-weight:700;color:#6b7280;letter-spacing:.5px;margin-bottom:.4rem;">UANG DITERIMA</div>
+          <div class="input-group">
+            <span class="input-group-text fw-bold">Rp</span>
+            <input type="text" id="kalkInputField" class="form-control form-control-lg fw-bold"
+              placeholder="0" inputmode="numeric"
+              style="font-size:1.5rem;letter-spacing:.5px;"
+              oninput="formatKalkInput(this)">
+          </div>
+        </div>
+
+        {{-- Kembalian --}}
+        <div class="kalk-kembalian-box netral" id="kalkKembalianBox">
+          <div class="kalk-kem-label" id="kalkKembalianLabel">KEMBALIAN</div>
+          <div class="kalk-kem-val" id="kalkKembalianVal">—</div>
+        </div>
+
+        {{-- Tombol aksi --}}
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-secondary flex-fill rounded-pill" onclick="tutupKalkCash()">
+            <i class="bi bi-arrow-left me-1"></i>Kembali
+          </button>
+          <button class="btn btn-success flex-fill rounded-pill fw-bold" id="btnKonfirmasiCash" onclick="konfirmasiCash()" disabled>
+            <i class="bi bi-check-circle me-1"></i>Konfirmasi
+          </button>
+        </div>
+
       </div>
     </div>
   </div>
@@ -310,12 +441,146 @@ function editItem(i) {
 }
 
 let metodeTerpilih = '';
+let _kalkTotal = 0;
+
 function pilihMetode(m, el) {
   document.querySelectorAll('.metode-btn').forEach(b => b.classList.remove('selected'));
   el.classList.add('selected');
   metodeTerpilih = m;
   document.getElementById('inputNamaPembeli').style.display = m === 'hutang' ? 'block' : 'none';
+
+  // QRIS: tampilkan modal QR
+  if (m === 'qris') {
+    const total = cart.reduce((s,i) => s+i.harga*i.qty, 0);
+    document.getElementById('qrisNominal').textContent = 'Rp ' + parseInt(total).toLocaleString('id-ID');
+    bootstrap.Modal.getInstance(document.getElementById('modalBayar'))?.hide();
+    setTimeout(() => new bootstrap.Modal(document.getElementById('modalQris')).show(), 300);
+  }
+
+  // TRANSFER: tampilkan modal transfer
+  if (m === 'transfer') {
+    const total = cart.reduce((s,i) => s+i.harga*i.qty, 0);
+    document.getElementById('transferNominal').textContent = 'Rp ' + parseInt(total).toLocaleString('id-ID');
+    bootstrap.Modal.getInstance(document.getElementById('modalBayar'))?.hide();
+    setTimeout(() => new bootstrap.Modal(document.getElementById('modalTransfer')).show(), 300);
+  }
+
+  // CASH: tampilkan modal kalkulator
+  if (m === 'cash') {
+    _kalkTotal = cart.reduce((s,i) => s+i.harga*i.qty, 0);
+    bootstrap.Modal.getInstance(document.getElementById('modalBayar'))?.hide();
+    setTimeout(() => bukaKalkCash(), 300);
+  }
 }
+
+// ── Kalkulator Cash ──
+function bukaKalkCash() {
+  document.getElementById('kalkTotalText').textContent = 'Rp ' + parseInt(_kalkTotal).toLocaleString('id-ID');
+  document.getElementById('kalkInputField').value = '';
+  hitungKembalian();
+
+  // Quick-fill: kelipatan pecahan uang >= total
+  const pecahan = [1000,2000,5000,10000,20000,50000,100000];
+  const roundedOptions = new Set();
+  for (const p of pecahan) {
+    roundedOptions.add(Math.ceil(_kalkTotal / p) * p);
+  }
+  const sortedOptions = [...roundedOptions].sort((a,b) => a-b).slice(0,6);
+  document.getElementById('kalkQuickFill').innerHTML = sortedOptions.map(v =>
+    `<div class="quick-btn" onclick="kalkQuick(${v})">Rp ${parseInt(v).toLocaleString('id-ID')}</div>`
+  ).join('');
+
+  const modal = new bootstrap.Modal(document.getElementById('modalKalkCash'));
+  modal.show();
+  // Auto-focus input setelah modal tampil
+  document.getElementById('modalKalkCash').addEventListener('shown.bs.modal', () => {
+    document.getElementById('kalkInputField').focus();
+  }, { once: true });
+}
+
+function tutupKalkCash() {
+  bootstrap.Modal.getInstance(document.getElementById('modalKalkCash'))?.hide();
+  setTimeout(() => new bootstrap.Modal(document.getElementById('modalBayar')).show(), 300);
+}
+
+function kalkQuick(val) {
+  const field = document.getElementById('kalkInputField');
+  field.value = parseInt(val).toLocaleString('id-ID');
+  hitungKembalian();
+  field.focus();
+}
+
+function formatKalkInput(el) {
+  // Ambil hanya digit
+  const raw = el.value.replace(/\D/g, '');
+  // Format dengan titik ribuan (id-ID)
+  el.value = raw ? parseInt(raw).toLocaleString('id-ID') : '';
+  hitungKembalian();
+}
+
+function hitungKembalian() {
+  // Strip titik ribuan, ambil nilai numerik bersih
+  const raw = document.getElementById('kalkInputField').value.replace(/\./g, '').replace(/,/g, '');
+  const diterima = parseInt(raw) || 0;
+  const kembalian = diterima - _kalkTotal;
+  const box   = document.getElementById('kalkKembalianBox');
+  const label = document.getElementById('kalkKembalianLabel');
+  const val   = document.getElementById('kalkKembalianVal');
+  const btn   = document.getElementById('btnKonfirmasiCash');
+
+  box.className = 'kalk-kembalian-box';
+  if (diterima === 0) {
+    box.classList.add('netral');
+    label.textContent = 'KEMBALIAN';
+    val.textContent = '—';
+    btn.disabled = true;
+  } else if (kembalian < 0) {
+    box.classList.add('negatif');
+    label.textContent = '⚠ KURANG';
+    val.textContent = 'Rp ' + Math.abs(kembalian).toLocaleString('id-ID');
+    btn.disabled = true;
+  } else {
+    box.classList.add('positif');
+    label.textContent = '✅ KEMBALIAN';
+    val.textContent = 'Rp ' + kembalian.toLocaleString('id-ID');
+    btn.disabled = false;
+  }
+}
+
+function konfirmasiCash() {
+  bootstrap.Modal.getInstance(document.getElementById('modalKalkCash'))?.hide();
+  setTimeout(() => prosesBayar(), 300);
+}
+
+function tutupQris() {
+  bootstrap.Modal.getInstance(document.getElementById('modalQris'))?.hide();
+  setTimeout(() => new bootstrap.Modal(document.getElementById('modalBayar')).show(), 300);
+}
+
+function konfirmasiQris() {
+  bootstrap.Modal.getInstance(document.getElementById('modalQris'))?.hide();
+  setTimeout(() => prosesBayar(), 300);
+}
+
+function tutupTransfer() {
+  bootstrap.Modal.getInstance(document.getElementById('modalTransfer'))?.hide();
+  setTimeout(() => new bootstrap.Modal(document.getElementById('modalBayar')).show(), 300);
+}
+
+function konfirmasiTransfer() {
+  bootstrap.Modal.getInstance(document.getElementById('modalTransfer'))?.hide();
+  setTimeout(() => prosesBayar(), 300);
+}
+
+function copyRekening() {
+  const text = document.getElementById('rekDisplay').textContent.trim();
+  navigator.clipboard.writeText(text).then(() => {
+    alert('Nomor rekening berhasil disalin!');
+  }).catch(() => {
+    alert('Gagal menyalin nomor rekening.');
+  });
+}
+
 
 function bukaModalBayar() {
   const total = cart.reduce((s,i) => s+i.harga*i.qty, 0);

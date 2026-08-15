@@ -17,6 +17,7 @@
         <tr style="background:#ef4444;">
           <th style="color:#111;border:none;">ID_STAFF</th>
           <th style="color:#111;border:none;">USERNAME</th>
+          <th style="color:#111;border:none;">NAMA KARYAWAN</th>
           <th style="color:#111;border:none;">STATUS</th>
           <th style="color:#111;border:none;">ROLE</th>
           <th style="color:#111;border:none;">PASSWORD</th>
@@ -27,6 +28,7 @@
         @foreach($users as $u)
         <tr>
           <td class="fw-semibold font-monospace">{{ $u->id_staff }}</td>
+          <td class="font-monospace">{{ $u->username }}</td>
           <td>{{ $u->name }}</td>
           <td>
             <span class="badge-{{ $u->status === 'on_air' ? 'on-air' : 'libur' }}">
@@ -62,8 +64,12 @@
           <input type="text" id="fIdStaff" class="form-control" placeholder="contoh: KSR_2">
         </div>
         <div class="mb-3">
-          <label class="form-label small fw-semibold">USERNAME</label>
-          <input type="text" id="fUsername" class="form-control" placeholder="Nama karyawan">
+          <label class="form-label small fw-semibold">USERNAME <span class="text-muted fw-normal">(untuk login)</span></label>
+          <input type="text" id="fUsername" class="form-control" placeholder="contoh: kasir1">
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">NAMA KARYAWAN</label>
+          <input type="text" id="fNama" class="form-control" placeholder="Nama lengkap karyawan">
         </div>
         <div class="mb-3">
           <label class="form-label small fw-semibold">PASSWORD</label>
@@ -82,11 +88,9 @@
         </div>
         <div class="mb-0">
           <label class="form-label small fw-semibold">ROLE</label>
-          <div class="d-flex gap-2 flex-wrap">
-            <button type="button" class="btn btn-outline-secondary flex-fill role-btn" onclick="setRole('admin',this)">Admin</button>
-            <button type="button" class="btn btn-primary flex-fill role-btn" onclick="setRole('kasir',this)">Kasir</button>
-          </div>
-          <input type="hidden" id="fRole" value="kasir">
+          <div id="fRoleDisplay" class="form-control bg-light text-muted" style="cursor:not-allowed;">-</div>
+          <input type="hidden" id="fRole" value="">
+          <div class="form-text"><i class="bi bi-lock me-1"></i>Role tidak dapat diubah melalui form ini</div>
         </div>
       </div>
       <div class="modal-footer border-0">
@@ -143,9 +147,11 @@ function bukaModalTambah() {
   document.getElementById('fIdStaff').value = '';
   document.getElementById('fIdStaff').disabled = false;
   document.getElementById('fUsername').value = '';
+  document.getElementById('fNama').value = '';
   document.getElementById('fPassword').value = '';
+  document.getElementById('fRole').value = 'kasir';
+  document.getElementById('fRoleDisplay').textContent = 'Kasir';
   setStatus('on_air', document.querySelector('.status-btn'));
-  setRole('kasir', document.querySelectorAll('.role-btn')[1]);
   new bootstrap.Modal(document.getElementById('modalUser')).show();
 }
 
@@ -154,19 +160,16 @@ function editUser(u) {
   document.getElementById('editUserId').value = u.id;
   document.getElementById('fIdStaff').value   = u.id_staff;
   document.getElementById('fIdStaff').disabled = true;
-  document.getElementById('fUsername').value  = u.name;
+  document.getElementById('fUsername').value  = u.username;
+  document.getElementById('fNama').value      = u.name;
   document.getElementById('fPassword').value  = '';
+  document.getElementById('fRole').value = u.role;
+  document.getElementById('fRoleDisplay').textContent = u.role.charAt(0).toUpperCase() + u.role.slice(1);
   // Set status
   document.querySelectorAll('.status-btn').forEach(b => b.className = 'btn btn-outline-secondary flex-fill status-btn');
   document.getElementById('fStatus').value = u.status;
   const sBtn = u.status === 'on_air' ? document.querySelectorAll('.status-btn')[0] : document.querySelectorAll('.status-btn')[1];
   sBtn.className = 'btn btn-success flex-fill status-btn';
-  // Set role
-  const roles = ['admin','kasir'];
-  document.querySelectorAll('.role-btn').forEach((b,i) => {
-    b.className = roles[i] === u.role ? 'btn btn-primary flex-fill role-btn' : 'btn btn-outline-secondary flex-fill role-btn';
-  });
-  document.getElementById('fRole').value = u.role;
   new bootstrap.Modal(document.getElementById('modalUser')).show();
 }
 
@@ -176,11 +179,7 @@ function setStatus(val, el) {
   document.getElementById('fStatus').value = val;
 }
 
-function setRole(val, el) {
-  document.querySelectorAll('.role-btn').forEach(b => b.className = 'btn btn-outline-secondary flex-fill role-btn');
-  el.className = 'btn btn-primary flex-fill role-btn';
-  document.getElementById('fRole').value = val;
-}
+
 
 function togglePwd() {
   const input = document.getElementById('fPassword');
@@ -192,19 +191,21 @@ function togglePwd() {
 async function simpanUser() {
   const id       = document.getElementById('editUserId').value;
   const id_staff = document.getElementById('fIdStaff').value;
-  const name     = document.getElementById('fUsername').value;
+  const username = document.getElementById('fUsername').value;
+  const name     = document.getElementById('fNama').value;
   const password = document.getElementById('fPassword').value;
   const status   = document.getElementById('fStatus').value;
   const role     = document.getElementById('fRole').value;
 
-  if (!name) { alert('Username wajib diisi!'); return; }
+  if (!username) { alert('Username wajib diisi!'); return; }
+  if (!name) { alert('Nama Karyawan wajib diisi!'); return; }
   if (!id && !id_staff) { alert('ID Staff wajib diisi!'); return; }
   if (!id && !password) { alert('Password wajib diisi!'); return; }
 
   const url    = id ? `/control-access/${id}` : '/control-access';
   const method = id ? 'PUT' : 'POST';
-  const body   = {name, status, role};
-  if (!id) { body.id_staff = id_staff; body.username = name; }
+  const body   = {name, username, status, role};
+  if (!id) { body.id_staff = id_staff; }
   if (password) body.password = password;
 
   const res = await fetch(url, {

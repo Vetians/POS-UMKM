@@ -27,12 +27,22 @@ class SettingController extends Controller {
     }
 
     public function updateToko(Request $request) {
-        $data = $request->validate(['nama_toko'=>'required','alamat'=>'nullable']);
+        $data = $request->validate([
+            'nama_toko' => 'required',
+            'alamat' => 'nullable',
+            'nomor_rekening' => 'nullable|string'
+        ]);
         if ($request->hasFile('logo')) {
             $f = $request->file('logo');
             $fn = time().'_'.$f->getClientOriginalName();
             $f->move(public_path('uploads/toko'), $fn);
             $data['logo'] = $fn;
+        }
+        if ($request->hasFile('qris_image')) {
+            $f = $request->file('qris_image');
+            $fn = 'qris_'.time().'.'.$f->getClientOriginalExtension();
+            $f->move(public_path('uploads/toko'), $fn);
+            $data['qris_image'] = $fn;
         }
         TokoSetting::first()->update($data);
         return back()->with('success','Info toko berhasil diperbarui');

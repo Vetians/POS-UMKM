@@ -13,7 +13,8 @@ class KasirController extends Controller {
         $drafts = Transaksi::where('is_draft', true)
             ->where('user_id', auth()->id())
             ->orderByDesc('updated_at')->get();
-        return view('kasir.index', compact('drafts'));
+        $toko = \App\Models\TokoSetting::first();
+        return view('kasir.index', compact('drafts','toko'));
     }
 
     public function cariProduk(Request $request) {

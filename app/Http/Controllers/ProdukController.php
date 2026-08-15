@@ -36,8 +36,14 @@ class ProdukController extends Controller {
         return response()->json(['success'=>true,'produk'=>$p]);
     }
 
-    public function update(Request $request, Produk $produk) {
+    public function update(Request $request, string $id) { // <-- Menambahkan 'string' menghilangkan error Intelephense
+        
+        // 1. Cari data produk berdasarkan ID secara manual
+        $produk = Produk::findOrFail($id);
+
+        // 2. Jalankan validasi data inputan dari form
         $data = $request->validate([
+            // Menggunakan {$produk->id} agar kode barang murni miliknya sendiri tidak dianggap duplikat saat disave
             'kode'       => "required|unique:produk,kode,{$produk->id}",
             'nama'       => 'required',
             'merk'       => 'nullable',
@@ -46,18 +52,32 @@ class ProdukController extends Controller {
             'deskripsi'  => 'nullable',
             'foto'       => 'nullable|image|max:2048',
         ]);
+
+        // 3. Logika penggantian gambar/foto produk
         if ($request->hasFile('foto')) {
+            // Hapus file foto lama di folder public/uploads/produk jika sebelumnya sudah ada foto
             if ($produk->foto && file_exists(public_path('uploads/produk/'.$produk->foto))) {
                 unlink(public_path('uploads/produk/'.$produk->foto));
             }
+            
+            // Upload file foto baru ke folder server lokal Laragon
             $file = $request->file('foto');
             $filename = time().'_'.$file->getClientOriginalName();
             $file->move(public_path('uploads/produk'), $filename);
             $data['foto'] = $filename;
         }
+
+        // 4. Eksekusi pembaruan data ke dalam database MySQL
         $produk->update($data);
-        AuditLog::catat('UPDATE','Produk',"Edit produk: {$produk->nama}");
-        return response()->json(['success'=>true,'produk'=>$produk->fresh()]);
+
+        // 5. Catat aktivitas pembaruan ke Audit Log kelompokmu
+        AuditLog::catat('UPDATE', 'Produk', "Edit produk: {$produk->nama}");
+
+        // 6. Kembalikan respon sukses berupa JSON murni ke JavaScript di Blade
+        return response()->json([
+            'success' => true,
+            'produk'  => $produk->fresh()
+        ]);
     }
 
     public function destroy(Produk $produk) {

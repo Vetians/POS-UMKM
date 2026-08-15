@@ -16,6 +16,9 @@ Route::post('/logout',[AuthController::class, 'logout'])->name('logout');
 
 Route::middleware('auth')->group(function () {
 
+    // KODE BARU: Route untuk secure logout (bisa diakses semua role yang sudah login)
+    Route::post('/logout-secure', [AuthController::class, 'secureLogout'])->name('logout.secure');
+
     // Kasir — bisa diakses semua role
     Route::prefix('kasir')->name('kasir.')->group(function () {
         Route::get('/',                        [KasirController::class, 'index'])->name('index');
@@ -48,10 +51,10 @@ Route::middleware('auth')->group(function () {
             Route::put('/kategori/{kategori}',    [KategoriController::class, 'update'])->name('kategori.update');
             Route::delete('/kategori/{kategori}', [KategoriController::class, 'destroy'])->name('kategori.destroy');
 
+            Route::match(['POST', 'PUT'], '/item/{produk}', [ProdukController::class, 'update'])->name('update');
+            Route::delete('/item/{produk}',       [ProdukController::class, 'destroy'])->name('destroy');
             Route::get('/{kategori}',             [ProdukController::class, 'index'])->name('index');
             Route::post('/{kategori}',            [ProdukController::class, 'store'])->name('store');
-            Route::post('/item/{produk}',         [ProdukController::class, 'update'])->name('update');
-            Route::delete('/item/{produk}',       [ProdukController::class, 'destroy'])->name('destroy');
         });
 
         // Catatan Penjualan
@@ -80,8 +83,4 @@ Route::middleware('auth')->group(function () {
 
     }); // end role:admin
 
-});
-
-Route::get('/', function () {
-    return redirect()->route('login');
 });

@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder {
         User::create([
             'id_staff' => 'KSR_1',
             'name'     => 'Kasir 1',
-            'username' => 'kasir',
+            'username' => 'kasir1',
             'password' => Hash::make('kasir123'),
             'role'     => 'kasir',
             'status'   => 'on_air',

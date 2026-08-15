@@ -7,15 +7,19 @@
 <title>@yield('title','Madura\'s Store')</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&display=swap" rel="stylesheet">
 <style>
-:root{--sidebar-w:180px;--blue:#1a2fa0;--blue-dark:#111e78;--orange:#f97316;--orange-dark:#ea6200;}
+:root{--sidebar-w:210px;--blue:#1a2fa0;--blue-dark:#111e78;--orange:#f97316;--orange-dark:#ea6200;}
 *{box-sizing:border-box;}
 body{font-family:'Segoe UI',sans-serif;background:#f0f2f8;margin:0;}
 /* Sidebar */
 .sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:var(--blue-dark);display:flex;flex-direction:column;z-index:1000;}
-.sidebar-brand{padding:.75rem 1.2rem;background:var(--blue);border-bottom:1px solid rgba(255,255,255,.1);height:60px;display:flex;flex-direction:column;justify-content:center;}
-.sidebar-brand .toko-name{color:#fff;font-weight:700;font-size:.95rem;line-height:1.2;}
-.sidebar-brand .toko-sub{color:rgba(255,255,255,.5);font-size:.7rem;}
+.sidebar-brand{padding:.6rem 1rem;background:var(--blue);border-bottom:1px solid rgba(255,255,255,.1);height:84px;display:flex;flex-direction:row;align-items:center;gap:.75rem;overflow:hidden;}
+.logo-toko{width:52px;height:52px;object-fit:contain;flex-shrink:0;border-radius:6px;}
+.sidebar-brand .toko-name{color:#fff;font-weight:700;font-size:1.05rem;line-height:1.25;white-space:normal;font-family:'Bodoni Moda', serif;letter-spacing: 0.5px;}
+.sidebar-brand .toko-sub{color:rgba(255,255,255,.5);font-size:.72rem;}
 .sidebar-avatar{padding:1.2rem 1.2rem .5rem;text-align:center;}
 .sidebar-avatar img{width:60px;height:60px;border-radius:50%;border:3px solid var(--orange);object-fit:cover;}
 .sidebar-avatar .av-name{color:#fff;font-size:.85rem;font-weight:600;margin-top:.5rem;}
@@ -26,7 +30,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f2f8;margin:0;}
 .sidebar-nav a i{font-size:1rem;width:1.2rem;text-align:center;}
 /* Topbar */
 .main-content{margin-left:var(--sidebar-w);min-height:100vh;display:flex;flex-direction:column;}
-.topbar{background:var(--blue);padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;height:60px;}
+.topbar{background:var(--blue);padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;height:84px;}
 .topbar-title{color:#fff;font-weight:700;font-size:1.1rem;}
 .topbar-user{display:flex;align-items:center;gap:.75rem;}
 .topbar-user .uname{text-align:right;}
@@ -57,22 +61,43 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f2f8;margin:0;}
 @stack('styles')
 </head>
 <body>
-@php $toko = \App\Models\TokoSetting::first(); $user = auth()->user(); @endphp
+@php 
+  $toko = \App\Models\TokoSetting::first(); 
+  $user = auth()->user(); 
+  
+  $avatarName = 'User';
+  $avatarBg = 'f97316'; // Orange khas tema toko untuk semua
+  if ($user->role === 'admin') {
+      $avatarName = 'AD';
+  } else {
+      $lowerName = strtolower($user->name);
+      if (str_contains($lowerName, '1') || str_contains($lowerName, 'k1')) {
+          $avatarName = 'K1';
+      } elseif (str_contains($lowerName, '2') || str_contains($lowerName, 'k2')) {
+          $avatarName = 'K2';
+      } elseif (str_contains($lowerName, '3') || str_contains($lowerName, 'k3')) {
+          $avatarName = 'K3';
+      } else {
+          $avatarName = $user->name;
+      }
+  }
+  $avatarUrl = "https://ui-avatars.com/api/?name=" . urlencode($avatarName) . "&background=" . $avatarBg . "&color=fff&bold=true";
+@endphp
 <div class="sidebar">
   <div class="sidebar-brand">
     @if($toko?->logo)
-      <img src="{{ asset('uploads/toko/'.$toko->logo) }}" style="height:32px;margin-bottom:.3rem;display:block;">
+      <img src="{{ asset('img/login/Logo_Website.png') }}" class="logo-toko">
     @endif
-    <div class="toko-name">{{ $toko?->nama_toko ?? "Madura's Store" }}</div>
-  </div>
+  <div class="toko-name">{{ $toko?->nama_toko ?? "Madura's Store" }}</div>
+</div>
   <div class="sidebar-avatar">
-    <img src="{{ $user->foto ? asset('uploads/user/'.$user->foto) : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=f97316&color=fff' }}" alt="">
+    <img src="{{ $avatarUrl }}" alt="">
     <div class="av-name">{{ $user->name }}</div>
     <div class="av-sub">{{ $toko?->nama_toko ?? "Madura's Store" }}</div>
   </div>
   <nav class="sidebar-nav">
     @if(auth()->user()->role === 'admin')
-      <a href="{{ route('dashboard') }}"         class="{{ request()->routeIs('dashboard') ? 'active':'' }}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+      <a href="{{ route('dashboard') }}"         class="{{ request()->routeIs('dashboard') ? 'active':'' }}"><i class="bi bi-house"></i> Dashboard</a>
     @endif
     <a href="{{ route('kasir.index') }}"        class="{{ request()->routeIs('kasir.*') ? 'active':'' }}"><i class="bi bi-cart3"></i> Kasir</a>
     @if(auth()->user()->role === 'admin')
@@ -89,23 +114,52 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f2f8;margin:0;}
 <div class="main-content">
   <div class="topbar">
     <div class="topbar-title">
-      <a href="{{ auth()->user()->role === 'admin' ? route('dashboard') : route('kasir.index') }}" style="color:#fff;font-size:1.2rem;line-height:1;"><i class="bi bi-arrow-left"></i></a>
+      
     </div>
     <div class="topbar-user">
       <div class="uname">
         <div class="uname-text">{{ $user->name }}</div>
         <div class="uname-role">{{ ucfirst($user->role) }}</div>
       </div>
-      <img src="{{ $user->foto ? asset('uploads/user/'.$user->foto) : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=f97316&color=fff' }}" alt="">
-      <form action="{{ route('logout') }}" method="POST" class="d-inline">
-        @csrf<button type="submit" class="btn btn-sm btn-link text-white p-0 ms-1" title="Logout"><i class="bi bi-box-arrow-right fs-5"></i></button>
-      </form>
+      <img src="{{ $avatarUrl }}" alt="">
+      <button type="button" class="btn btn-sm btn-link text-white p-0 ms-1" data-bs-toggle="modal" data-bs-target="#logoutSecureModal" title="Logout">
+        <i class="bi bi-box-arrow-right fs-5"></i>
+      </button>
     </div>
   </div>
   <div class="content-area">
     @if(session('success'))<div class="alert alert-success alert-dismissible fade show"><i class="bi bi-check-circle me-2"></i>{{ session('success') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>@endif
     @if($errors->any())<div class="alert alert-danger alert-dismissible fade show"><i class="bi bi-exclamation-triangle me-2"></i>@foreach($errors->all() as $e){{ $e }}<br>@endforeach<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>@endif
     @yield('content')
+  </div>
+</div>
+<div class="modal fade" id="logoutSecureModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="logoutSecureModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+      <div class="modal-header" style="background: var(--blue-dark); color: #fff; border-radius: 12px 12px 0 0;">
+        <h5 class="modal-title" id="logoutSecureModalLabel"><i class="bi bi-shield-lock-fill me-2 text-warning"></i> Keamanan Keluar Kasir</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="{{ route('logout.secure') }}" method="POST">
+        @csrf
+        <div class="modal-body">
+          <div class="text-center mb-3">
+            <i class="bi bi-person-exclamation text-warning" style="font-size: 3rem;"></i>
+          </div>
+          <p class="mb-1 text-center">Anda sedang aktif sebagai: <strong>{{ $user->name }}</strong> (<span class="text-muted">{{ ucfirst($user->role) }}</span>)</p>
+          <p class="text-danger text-center small mb-3">*Demi keamanan transaksi di Madura's Store, masukkan password Anda untuk menutup sesi kasir.</p>
+          
+          <div class="mb-2">
+            <label for="password_logout" class="form-label font-weight-bold" style="font-size: 0.85rem;">Password Konfirmasi</label>
+            <input type="password" id="password_logout" name="password" class="form-control" placeholder="Masukkan password akun Anda" required autocomplete="current-password">
+          </div>
+        </div>
+        <div class="modal-footer" style="background: #f8f9fa; border-radius: 0 0 12px 12px;">
+          <button type="button" class="btn btn-sm btn-secondary px-3" data-bs-dismiss="modal" style="border-radius: 8px;">Batal</button>
+          <button type="submit" class="btn btn-sm btn-orange px-3" style="border-radius: 8px;">Verifikasi & Keluar</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
