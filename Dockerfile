@@ -37,9 +37,9 @@ COPY . .
 RUN composer run-script post-autoload-dump
 
 # Permissions
-RUN chown -R www-data:www-data \
-    storage \
-    bootstrap/cache
+RUN mkdir -p public/uploads/produk \
+    && chown -R www-data:www-data storage bootstrap/cache public/uploads \
+    && chmod -R 775 storage bootstrap/cache public/uploads
 
 # Nginx
 COPY docker/nginx/nginx.conf.template /etc/nginx/templates/default.conf.template

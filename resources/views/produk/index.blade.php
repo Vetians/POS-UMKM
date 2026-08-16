@@ -126,7 +126,7 @@ let actionUrl = '';
 let _hapusId = null, _hapusBtn = null; // Variabel penampung elemen global
 
 function bukaModalTambah() {
-  actionUrl = '{{ route("produk.store", $kategori) }}';
+  actionUrl = '/data-produk/{{ $kategori->id }}';
   document.getElementById('modalProdukTitle').textContent = 'Tambahkan Produk';
   document.getElementById('produkMethod').value = 'POST';
   document.getElementById('fKode').value = '';
