@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     nginx \
     supervisor \
+    gettext-base \
     && rm -rf /var/lib/apt/lists/*
 
 # PHP extensions
@@ -41,11 +42,11 @@ RUN chown -R www-data:www-data \
     bootstrap/cache
 
 # Nginx
-COPY docker/nginx/nginx.conf /etc/nginx/sites-available/default
+COPY docker/nginx/nginx.conf.template /etc/nginx/templates/default.conf.template
 
 # Supervisor
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-EXPOSE 10000
+EXPOSE 8080
 
 CMD ["/usr/bin/supervisord", "-n"]
